@@ -11,11 +11,11 @@ unsigned long long *createArray() {
 
 void printArray(const unsigned long long *array) {
   char *space = "";
-  unsigned long long i = M - 1;
+  unsigned long long pos = M - 1;
   do {
-    printf("%s%zu", space, array[i]);
+    printf("%s%zu", space, array[pos]);
     space = " ";
-  } while (i-- != 0);
+  } while (pos-- != 0);
   printf("\n");
 }
 
@@ -55,6 +55,7 @@ bool bloomCheck(const unsigned long long *array, const char *content) {
 }
 
 void checkIsPresent(const unsigned long long *array, const char *content) {
+  printf("Bitset:  ");
   printArray(array);
   bool isPresent = bloomCheck(array, content);
   printf("Is Present: %s\n", (isPresent ? "True" : "False"));

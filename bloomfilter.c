@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define M 100 // number of bits
-#define K 3   // number of hash functions
+#define M 20 // number of bits
+#define K 3  // number of hash functions
 
 unsigned char *createBitset() {
   return calloc(M / 8 + 1, sizeof(unsigned char));
@@ -18,9 +18,12 @@ void setBit(unsigned char *bitset, unsigned long long pos) {
 }
 
 void printBitset(const unsigned char *bitset) {
-  for (int i = M - 1; i >= 0; --i) {
-    printf("%b", getBit(bitset, i));
-  }
+  char *space = "";
+  unsigned long long pos = M - 1;
+  do {
+    printf("%s%b", space, getBit(bitset, pos));
+    space = " ";
+  } while (pos-- != 0);
   printf("\n");
 }
 
@@ -34,25 +37,33 @@ unsigned long long hashDjb2(const char *content, unsigned long long seed) {
 }
 
 void bloomAdd(unsigned char *bitset, const char *content) {
-  for (int i = 1; i <= K; ++i) {
+  for (unsigned long long i = 1; i <= K; ++i) {
     unsigned long long pos = hashDjb2(content, i) % M;
     setBit(bitset, pos);
   }
 }
 
-bool bloomCheck(unsigned char *bitset, const char *content) {
+bool bloomCheck(const unsigned char *bitset, const char *content) {
   unsigned char *contentBitset = createBitset();
   bool isPresent = true;
-  for (int i = 1; i <= K; ++i) {
+  for (unsigned long long i = 1; i <= K; ++i) {
     unsigned long long pos = hashDjb2(content, i) % M;
     setBit(contentBitset, pos);
     if (!getBit(bitset, pos)) {
       isPresent = false;
     }
   }
+  printf("Content: ");
   printBitset(contentBitset);
   free(contentBitset);
   return isPresent;
+}
+
+void checkIsPresent(const unsigned char *bitset, const char *content) {
+  printf("Bitset:  ");
+  printBitset(bitset);
+  bool isPresent = bloomCheck(bitset, content);
+  printf("Is Present: %s\n", (isPresent ? "True" : "False"));
 }
 
 int main() {
@@ -62,11 +73,7 @@ int main() {
   bloomAdd(nicknames, "singleton");
   bloomAdd(nicknames, "tsoding");
 
-  printBitset(nicknames);
-
-  bool isPresent = bloomCheck(nicknames, "manualdomundo");
-
-  printf("Is Present: %s", (isPresent ? "True" : "False"));
+  checkIsPresent(nicknames, "manualdomundo");
 
   free(nicknames);
   return 0;
